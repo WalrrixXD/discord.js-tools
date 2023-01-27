@@ -1,0 +1,20 @@
+{
+  "name": "discord.js-tools",
+  "version": "1.0.0",
+  "description": "Funciones útiles para discord.js v14",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "discord.js",
+    "discord",
+    "discord-bots"
+  ],
+  "author": "W4LX",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.7.1"
+  },
+  "devDependencies": {}
+}
