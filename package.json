@@ -1,6 +1,6 @@
 {
   "name": "discord.js-tools",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Funciones útiles para discord.js v14",
   "main": "src/index.js",
   "scripts": {
@@ -16,5 +16,9 @@
   "dependencies": {
     "discord.js": "^14.7.1"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WalrrixXD/discord.js-tools"
+  }
 }

@@ -19,7 +19,7 @@ module.exports = {
     return message.reply({
       allowedMentions: { repliedUser: false },
       embeds: [
-        embed.setFooter({
+        embed[0].setFooter({
           text: `Página ${page + 1} de ${embed.length}`,
         }),
       ],
