@@ -1,4 +1,10 @@
 const Discord = require("discord.js");
+const validStyles = [
+  Discord.ButtonStyle.Primary,
+  Discord.ButtonStyle.Secondary,
+  Discord.ButtonStyle.Success,
+  Discord.ButtonStyle.Danger,
+];
 
 module.exports = {
   disabledButtons(button) {
@@ -26,5 +32,20 @@ module.exports = {
       components: [buttons],
       fetchReply: option ? true : null,
     });
+  },
+
+  validateButtonStyle(buttonStyle) {
+    for (let i = 0; i < buttonStyle.length; i++) {
+      if (
+        !validStyles.includes(buttonStyle[i]) &&
+        buttonStyle[i] !== "Primary" &&
+        buttonStyle[i] !== "Secondary" &&
+        buttonStyle[i] !== "Success" &&
+        buttonStyle[i] !== "Danger"
+      )
+        return true;
+
+      return false;
+    }
   },
 };

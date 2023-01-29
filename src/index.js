@@ -1,4 +1,4 @@
 module.exports.EmbedPages = require("./functions/EmbedPages");
-module.exports.limit = require("./functions/limit");
+module.exports.shortenText = require("./functions/shortenText");
 module.exports.reverseText = require("./functions/reverseText");
-module.exports.validImageUrl = require("./functions/validImageUrl");
+module.exports.validateImageURL = require("./functions/validateImageURL");

@@ -9,7 +9,7 @@ Funciones útiles para discord.js V14
 ## Paginas en embed
 
 ```js
-const { EmbedPages } = require("utilities-djs");
+const { EmbedPages } = require("discord.js-tools"); //Importamos la función en nuestro archivo.
 
 let number = 1;
 
@@ -35,13 +35,14 @@ new EmbedPages({
     start: "🏠",
     advance: "➡",
   },
-}).startPaging();
+  styleButtons: ["Success", "Danger", "Success"], //Le pasamos un estilo válido a los 3 botones (optional)
+});
 ```
 
 ## Texto en reversa
 
 ```js
-const { reverseText } = require("utilities-djs");
+const { reverseText } = require("discord.js-tools"); //Importamos la función en nuestro archivo.
 
 const text = "Este texto se pondrá en reversa.";
 
@@ -53,12 +54,12 @@ console.log(reverseText(text)); //Invocamos la función utilizando la variable '
 ## Acortar un texto
 
 ```js
-const { limit } = require("utilities-djs");
+const { shortenText } = require("discord.js-tools"); //Importamos la función en nuestro archivo.
 
 const text = "Hola esto es un ejemplo."; //Ingresamos el texto a acortar.
 const limit = 22; //Se establece la longitud máxima de caracteres para el texto a visualizar
 
-console.log(limit(text, limit)); //Invocamos nuestra función proporcionando las variables necesarias.
+console.log(shortenText(text, limit)); //Invocamos nuestra función proporcionando las variables necesarias.
 
 //Output: "Hola esto es un ejempl..."
 ```
@@ -66,7 +67,7 @@ console.log(limit(text, limit)); //Invocamos nuestra función proporcionando las
 ## Validar la URL de una imagen
 
 ```js
-const { validImageUrl } = require("utilities-djs"); //Importamos la función en nuestro archivo.
+const { validImageUrl } = require("discord.js-tools"); //Importamos la función en nuestro archivo.
 
 const url = "https://example.com/image.jpg"; //URL a validar.
 

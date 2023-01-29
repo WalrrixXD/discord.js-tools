@@ -1,26 +1,30 @@
 const Discord = require("discord.js");
-const { disabledButtons, sendMessage } = require("../utils/tools");
+const {
+  disabledButtons,
+  sendMessage,
+  validateButtonStyle,
+} = require("../utils/tools");
 
 module.exports = class EmbedPages {
   constructor(options = {}) {
     if (!options.message)
       throw new TypeError(
-        "MISSING_ARGUMENTS: Por favor proporcione un argumento de mensaje"
+        "MISSING_ARGUMENTS: Por favor, proporcione un argumento de mensaje válido."
       );
 
     if (!options.itemsPerPage)
       throw new TypeError(
-        "MISSING_ARGUMENTS: Por favor proporcione los elementos por página."
+        "MISSING_ARGUMENTS: Por favor, indique cuántos elementos desea mostrar por página."
       );
-    if (isNaN(options.itemsPerPage))
+    if (typeof options.itemsPerPage !== "number")
       throw new TypeError(
-        "INVALID_ITEMS: Los elementos por página deben tener un valor numérico."
+        "INVALID_ITEMS: El número de elementos por página debe establecerse como un valor numérico."
       );
 
     if (!options.slashCommands) options.slashCommands = false;
     if (typeof options.slashCommands !== "boolean")
       throw new TypeError(
-        "INVALID_COMMAND_TYPE: El comando de barra debe ser un valor booleano. (true/false)"
+        "INVALID_COMMAND_TYPE: La opción para los comandos de barra debe ser establecida como un valor booleano (true/false)."
       );
 
     if (!options.time) options.time = 180000;
@@ -28,32 +32,34 @@ module.exports = class EmbedPages {
       throw new TypeError(
         "INVALID_TIME: la opción de tiempo debe ser un número en milisegundos"
       );
-    if (options.time < 1000)
-      throw new TypeError("INVALID_TIME: El tiempo mínimo es 1 segundo.");
-    if (options.time > 8.64e7)
+    if (options.time < 10000)
       throw new TypeError(
-        "INVALID_TIME: El tiempo no debe superar las 24 horas"
+        "INVALID_TIME: La duración mínima para establecer en un colector es de 10 segundos."
+      );
+    if (options.time > 900000)
+      throw new TypeError(
+        "INVALID_TIME: El tiempo establecido para el colector no debe exceder los 15 minutos."
       );
 
     if (!options.embed) options.embed = {};
     if (!options.embed.title) options.embed.title = "";
     if (typeof options.embed.title !== "string")
       throw new TypeError(
-        "INVALID_TITLE: El título del embed debe ser una cadena."
+        "INVALID_TITLE: El título del embed debe ser una cadena de texto."
       );
     if (!options.embed.description)
       throw new TypeError(
-        "MISSING_ARGUMENTS: La descripción del embed no puede estar vacía."
+        "MISSING_ARGUMENTS: La descripción del embed no puede ser nula o vacía."
       );
     if (!options.embed.thumbnail) options.embed.thumbnail = "";
     if (typeof options.embed.thumbnail !== "string")
       throw new TypeError(
-        "INVALID_THUMBNAIL: La miniatura del embed debe ser una cadena."
+        "INVALID_THUMBNAIL: La dirección URL de la miniatura del embed debe ser una cadena válida."
       );
     if (!options.embed.color) options.embed.color = "#0000";
     if (typeof options.embed.color !== "string")
       throw new TypeError(
-        "INVALID_COLOR: El color del embed debe ser una cadena."
+        "INVALID_COLOR: El color del embed debe ser especificado como una cadena en formato hexadecimal"
       );
 
     if (!options.emojis) options.emojis = {};
@@ -61,8 +67,27 @@ module.exports = class EmbedPages {
     if (!options.emojis.start) options.emojis.start = "🏠";
     if (!options.emojis.advance) options.emojis.advance = "➡";
 
+    if (!options.styleButtons)
+      options.styleButtons = ["Success", "Danger", "Success"];
+    if (!Array.isArray(options.styleButtons))
+      throw new TypeError(
+        "INVALID_FORM: Se debe proporcionar un arreglo con los nombres de los estilos de los botones."
+      );
+    if (options.styleButtons.length <= 0)
+      throw new TypeError(
+        "MISSING_ARGUMENTS: No se ha proporcionado ningún estilo para los botones."
+      );
+    if (options.styleButtons.length > 3)
+      throw new TypeError(
+        "LIMIT_EXCEEDED: Sólo se permiten proporcionar un máximo de 3 estilos válidos para los botones."
+      );
+    if (validateButtonStyle(options.styleButtons))
+      throw new TypeError(
+        "INVALID_BUTTONS_STYLE: La selección de estilos de botones proporcionada es inválida."
+      );
+
     this.message = options.message;
-    this.itemsPerPage = parseInt(options.itemsPerPage);
+    this.itemsPerPage = options.itemsPerPage;
     this.slashCommands = options.slashCommands;
     this.options = options;
     this.embeds = [];
@@ -85,6 +110,8 @@ module.exports = class EmbedPages {
 
       this.embeds.push(embed);
     }
+
+    this.startPaging();
   }
 
   async startPaging() {
@@ -92,17 +119,17 @@ module.exports = class EmbedPages {
       new Discord.ButtonBuilder()
         .setEmoji(this.options.emojis.back)
         .setCustomId("back")
-        .setStyle(3),
+        .setStyle(this.options.styleButtons || "Success"),
 
       new Discord.ButtonBuilder()
         .setEmoji(this.options.emojis.start)
         .setCustomId("start")
-        .setStyle(4),
+        .setStyle(this.options.styleButtons || "Danger"),
 
       new Discord.ButtonBuilder()
         .setEmoji(this.options.emojis.advance)
         .setCustomId("advance")
-        .setStyle(3),
+        .setStyle(this.options.styleButtons || "Success"),
     ]);
 
     let currentPage = 0;
@@ -132,7 +159,7 @@ module.exports = class EmbedPages {
     collector.on("collect", async (button) => {
       if (button.user.id !== user.id)
         return button.reply({
-          content: "`❌`  No puedes usar los botones.",
+          content: "`❌`  No se le permite utilizar estos botones.",
           ephemeral: true,
         });
 
@@ -252,7 +279,7 @@ module.exports = class EmbedPages {
     collector.on("end", async () => {
       await embedPages
         .edit({
-          content: "`⏱`  El tiempo de uso de los botones ha expirado.",
+          content: "`⏱`  El plazo para utilizar estos botones ha vencido.",
           components: disabledButtons(embedPages.components),
         })
         .catch(() => null);
