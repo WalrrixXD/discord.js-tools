@@ -19,23 +19,32 @@ const displayRoles = interaction.guild.roles.cache
   .slice(0, -1);
 
 new EmbedPages({
-  message: interaction, //Se proporciona el parámetro de interacción o mensaje.
-  itemsPerPage: 10, //Establecemos la cantidad de elementos a mostrar por página.
-  slashCommands: true, //Para habilitar los comandos de barra (SlashCommands), se debe llamar a la propiedad correspondiente (por defecto se encuentra deshabilitado).
-  time: 300000, //Se establece un límite temporal (en milisegundos) para el uso de las páginas (opcional)
+  message: interaction, // Se proporciona el parámetro de interacción o mensaje.
+  itemsPerPage: 10, // Establecemos la cantidad de elementos a mostrar por página.
+  slashCommands: true, // Para habilitar los comandos de barra (SlashCommands), se debe llamar a la propiedad correspondiente (por defecto se encuentra deshabilitado).
+  time: 300000, // Se establece un límite temporal (en milisegundos) para el uso de las páginas (opcional)
   embed: {
-    title: "Paginas - Embed", //El título para el embed (opcional).
-    description: displayRoles, //Utilizamos la variable 'displayRoles' previamente declarada.
-    thumbnail: interaction.guild.iconURL({ extension: "png" }), //Una miniatura para nuestro embed (opcional).
-    color: "DarkRed", //Un color para el embed (opcional).
+    // Creamos un embed.
+    author: {
+      // Establecemos un autor al embed (opcional).
+      name: `${interaction.user.username}`, // Nombre del author
+      icon_url: interaction.user.displayAvatarURL(), // Icono del autor (opcional)
+      url: "https://www.example.com/", // URL del autor (opcional)
+    },
+    title: "Paginas - Embed", // El título para el embed (opcional).
+    description: displayRoles, // Utilizamos la variable 'displayRoles' previamente declarada.
+    thumbnail: interaction.guild.iconURL(), // Una miniatura para nuestro embed (opcional).
+    color: "DarkRed", // Un color para el embed (opcional).
   },
   emojis: {
-    //Personalizamos los emojis de los botones en el embed (opcional)
+    // Personalizamos los emojis de los botones en el embed (opcional).
     back: "⬅",
     start: "🏠",
     advance: "➡",
   },
-  styleButtons: ["Success", "Danger", "Success"], //Le pasamos un estilo válido a los 3 botones (optional)
+  styleButtons: ["Success", "Danger", "Success"], // Le pasamos un estilo válido a los 3 botones (opcional)
+  timeOver: "El tiempo de los botones ha expirado.", // Se proporciona un mensaje cuando el tiempo de uso de los botones haya vencido (opcional).
+  otherMessage: "No puedes usar los botones.", // Se proporciona un mensaje en caso de que un usuario diferente al autor original intente usar los botones (opcional).
 });
 ```
 
@@ -67,12 +76,16 @@ console.log(shortenText(text, limit)); //Invocamos nuestra función proporcionan
 ## Validar la URL de una imagen
 
 ```js
-const { validImageUrl } = require("discord.js-tools"); //Importamos la función en nuestro archivo.
+const { isImageURL } = require("discord.js-tools"); //Importamos la función en nuestro archivo.
 
 const url = "https://example.com/image.jpg"; //URL a validar.
 
-validImageUrl(url); //Pasamos la URL que deseamos validar.
+//Pasamos la URL que deseamos validar.
+if (isImageURL(url)) {
+  console.log("La URL es una imagen.");
+} else {
+  console.log("La URL no es una imagen.");
+}
 
-//La función devolverá 'true' si la URL no es una imagen y 'false' si lo es.
-//Esta función puede ser utilizada en una condicional para validar si la URL es una imagen.
+//La función devolverá 'true' si la URL es una imagen y 'false' si no lo es.
 ```

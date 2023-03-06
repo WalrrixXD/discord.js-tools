@@ -3,10 +3,11 @@ const {
   disabledButtons,
   sendMessage,
   validateButtonStyle,
+  EmbedPagesOptions,
 } = require("../utils/tools");
 
 module.exports = class EmbedPages {
-  constructor(options = {}) {
+  constructor(options = EmbedPagesOptions) {
     if (!options.message)
       throw new TypeError(
         "MISSING_ARGUMENTS: Por favor, proporcione un argumento de mensaje válido."
@@ -42,6 +43,22 @@ module.exports = class EmbedPages {
       );
 
     if (!options.embed) options.embed = {};
+    if (!options.embed.author) options.embed.author = {};
+    if (!options.embed.author.name) options.embed.author.name = "";
+    if (typeof options.embed.author.name !== "string")
+      throw new TypeError(
+        "INVALID_AUTHOR_NAME: El nombre del autor del embed debe ser una cadena de texto."
+      );
+    if (!options.embed.author.icon_url) options.embed.author.icon_url = "";
+    if (typeof options.embed.author.icon_url !== "string")
+      throw new TypeError(
+        "INVALID_AUTHOR_ICON_URL: La dirección URL del icono del autor debe ser una cadena válida."
+      );
+    if (!options.embed.author.url) options.embed.author.url = "";
+    if (typeof options.embed.author.url !== "string")
+      throw new TypeError(
+        "INVALID_AUTHOR_URL: La dirección URL del autor debe ser una cadena válida."
+      );
     if (!options.embed.title) options.embed.title = "";
     if (typeof options.embed.title !== "string")
       throw new TypeError(
@@ -50,6 +67,10 @@ module.exports = class EmbedPages {
     if (!options.embed.description)
       throw new TypeError(
         "MISSING_ARGUMENTS: La descripción del embed no puede ser nula o vacía."
+      );
+    if (!Array.isArray(options.embed.description))
+      throw new TypeError(
+        "INVALID_DESCRIPTION: La descripción del embed debe ser un arreglo"
       );
     if (!options.embed.thumbnail) options.embed.thumbnail = "";
     if (typeof options.embed.thumbnail !== "string")
@@ -86,12 +107,29 @@ module.exports = class EmbedPages {
         "INVALID_BUTTONS_STYLE: La selección de estilos de botones proporcionada es inválida."
       );
 
+    if (!options.timeOverMessage) options.timeOverMessage = "";
+    if (typeof options.timeOverMessage !== "string")
+      throw new TypeError(
+        "INVALID_TIME_OVER_MESSAGE: El mensaje debe ser una cadena de texto."
+      );
+
+    if (!options.otherMessage)
+      options.otherMessage = "`❌`  No se le permite utilizar estos botones.";
+    if (typeof options.otherMessage !== "string")
+      throw new TypeError(
+        "INVALID_OTHER_MESSAGE: El mensaje debe ser una cadena de texto."
+      );
+
     this.message = options.message;
     this.itemsPerPage = options.itemsPerPage;
     this.slashCommands = options.slashCommands;
     this.options = options;
     this.embeds = [];
 
+    this.startPaging();
+  }
+
+  async startPaging() {
     let divided = this.itemsPerPage;
 
     for (let i = 0; i < this.options.embed.description.length; i += divided) {
@@ -103,33 +141,34 @@ module.exports = class EmbedPages {
       this.itemsPerPage += divided;
 
       let embed = new Discord.EmbedBuilder()
+        .setAuthor({
+          name: this.options.embed.author.name || null,
+          iconURL: this.options.embed.author.icon_url || null,
+          url: this.options.embed.author.url || null,
+        })
         .setTitle(this.options.embed.title || null)
-        .setDescription(description.join(""))
+        .setDescription(description.join("").toString())
         .setThumbnail(this.options.embed.thumbnail || null)
         .setColor(this.options.embed.color);
 
       this.embeds.push(embed);
     }
 
-    this.startPaging();
-  }
-
-  async startPaging() {
     const buttons = new Discord.ActionRowBuilder().addComponents([
       new Discord.ButtonBuilder()
         .setEmoji(this.options.emojis.back)
         .setCustomId("back")
-        .setStyle(this.options.styleButtons || "Success"),
+        .setStyle(this.options.styleButtons[0] || "Success"),
 
       new Discord.ButtonBuilder()
         .setEmoji(this.options.emojis.start)
         .setCustomId("start")
-        .setStyle(this.options.styleButtons || "Danger"),
+        .setStyle(this.options.styleButtons[1] || "Danger"),
 
       new Discord.ButtonBuilder()
         .setEmoji(this.options.emojis.advance)
         .setCustomId("advance")
-        .setStyle(this.options.styleButtons || "Success"),
+        .setStyle(this.options.styleButtons[2] || "Success"),
     ]);
 
     let currentPage = 0;
@@ -159,7 +198,7 @@ module.exports = class EmbedPages {
     collector.on("collect", async (button) => {
       if (button.user.id !== user.id)
         return button.reply({
-          content: "`❌`  No se le permite utilizar estos botones.",
+          content: this.options.otherMessage,
           ephemeral: true,
         });
 
@@ -279,7 +318,7 @@ module.exports = class EmbedPages {
     collector.on("end", async () => {
       await embedPages
         .edit({
-          content: "`⏱`  El plazo para utilizar estos botones ha vencido.",
+          content: this.options.timeOverMessage || null,
           components: disabledButtons(embedPages.components),
         })
         .catch(() => null);

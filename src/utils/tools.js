@@ -21,17 +21,27 @@ module.exports = {
     return button;
   },
 
-  sendMessage(message, option, embed, buttons, page) {
-    return message.reply({
-      allowedMentions: { repliedUser: false },
+  async sendMessage(message, option, embed, buttons, page) {
+    const messageOptions = {
       embeds: [
         embed[0].setFooter({
           text: `Página ${page + 1} de ${embed.length}`,
         }),
       ],
       components: [buttons],
-      fetchReply: option ? true : null,
-    });
+    };
+
+    if (option) {
+      if (message.deferred) return await message.editReply(messageOptions);
+
+      messageOptions.fetchReply = true;
+
+      return message.reply(messageOptions);
+    } else {
+      messageOptions.allowedMentions = { repliedUser: false };
+
+      return message.reply(messageOptions);
+    }
   },
 
   validateButtonStyle(buttonStyle) {
@@ -47,5 +57,31 @@ module.exports = {
 
       return false;
     }
+  },
+
+  EmbedPagesOptions: {
+    message: Object,
+    itemsPerPage: Number,
+    slashCommands: Boolean,
+    time: Number,
+    embed: {
+      author: {
+        name: String,
+        icon_url: String,
+        url: String,
+      },
+      title: String,
+      description: Array,
+      thumbnail: undefined,
+      color: undefined,
+    },
+    emojis: {
+      back: String,
+      start: String,
+      advance: String,
+    },
+    styleButtons: Array,
+    timeOverMessage: String,
+    otherMessage: String,
   },
 };
